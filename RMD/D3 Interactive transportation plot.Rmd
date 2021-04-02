@@ -1,0 +1,67 @@
+---
+title: "Discussion 3: Interactive plot for transportation data"
+author: "Andrea Gonzalez"
+output: html_notebook
+---
+
+#Install packages
+```{r}
+library(readr)
+library(plotly)
+library(ggplot2)
+library(tidyverse)
+library(wesanderson)
+```
+
+#Load data
+```{r}
+FlightsDelayed <- read.csv("Downloads/FlightsDelayed2.csv")
+FlightsDelayed
+```
+
+
+#Clean data
+##Data1: Flights departing from Newark and traveling during the weekends only
+```{r}
+# Group and summarize petal lengths by species
+data1 <- FlightsDelayed %>% group_by(Origin, Dest, Delayed) %>% filter(Origin == 'EWR') %>%
+  filter(DayOfWeek == '5'| DayOfWeek == '6'| DayOfWeek == '7')
+data1
+```
+
+##Data2: Flights deparing from LAX, MIA, and EWR, traveling during the weekend and flying for 400 miles or more
+```{r}
+data2 <- FlightsDelayed %>% 
+  filter(DayOfWeek %in% c("5", "6", "7")) %>%
+  filter(Origin == "LAX" | Origin == "EWR" | Origin == "MIA" ) %>%
+  filter(Distance > 400)
+data2
+```
+
+#Bar plot: This plot shows if flights departing from LAX, MIA, and EWR that were traveling during Friday, Saturday and Sunday, and were flying for at least 400 miles or more were delayed or not.
+```{r}
+Flights2 <- ggplot(data2, aes(x = Distance, y = Origin, fill = Delayed)) +
+  geom_bar(stat = "identity",  position = position_dodge(width = 1)) +
+  scale_fill_brewer(palette="Royal2") +
+  theme(legend.position = "right",
+        legend.text = element_text(colour="black", size=10, 
+                                     face="italic"),
+        panel.background = element_rect(fill = "seashell"),
+        plot.background = element_rect(fill = "seashell2"),
+        legend.background = element_rect(fill = "seashell2", size=.50, colour = "hotpink"),
+        panel.grid = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line( size=.50, color="hotpink" ),
+        plot.title = element_text(hjust = 0.5, size = 15, face = "italic", "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 15, face = "italic", "bold"),
+        axis.title.x = element_text(size = 15, face = "italic", "bold"),
+        axis.title.y = element_text(size = 15, face = "italic", "bold")) +
+  
+  labs(title = "Delayed Flights", 
+       subtitle = "Traveling 400 miles during the weekend", 
+       x = "Departing Airport", 
+       y = "Distance traveled", 
+       caption = "Source: DelayedFlights Dataset") 
+ggplotly(Flights2)
+```
+
